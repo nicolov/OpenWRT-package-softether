@@ -19,6 +19,11 @@ PKG_SOURCE:=softether-src-v$(PKG_VERSION)-$(PKG_RELEASE)-$(PKG_VERSION2).tar.gz
 PKG_SOURCE_URL:=http://jp.softether-download.com/files/softether/v$(PKG_VERSION)-$(PKG_RELEASE)-$(PKG_VERSION2)-$(PKG_DATE)-tree/Source_Code/
 PKG_MD5SUM:=59ae7ecfce22936b51621b5d860152c1
 
+PKG_BUILD_DEPENDS += softethervpn/host
+HOST_BUILD_DIR:=$(BUILD_DIR_HOST)/v$(PKG_VERSION)-$(PKG_RELEASE)
+HOST_BUILD_DEPENDS:=libiconv/host
+
+include $(INCLUDE_DIR)/host-build.mk
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/nls.mk
 
@@ -28,7 +33,7 @@ define Package/softethervpn
 	SUBMENU:=VPN
 	TITLE:=Open-Source Free Cross-platform Multi-protocol VPN
 	URL:=http://www.softether.org/
-	DEPENDS:=+libpthread +librt +libreadline +libopenssl +libncurses +kmod-tun
+	DEPENDS:=$(ICONV_DEPENDS) +libpthread +librt +libreadline +libopenssl +libncurses +kmod-tun
 endef
 
 define Package/softethervpn/conffiles
@@ -56,66 +61,27 @@ ifeq ($(ARCH),mipsel)
 	SE4WRT_OPTIONS := -minterlink-mips16
 endif
 
+HAMCORE_REL_PATH:=src/bin/BuiltHamcoreFiles/unix/
+HAMCORE_REL_FILE:=$(HAMCORE_REL_PATH)hamcore.se2
+
+define Build/Prepare
+	$(call Build/Prepare/Default)
+
+	# Uglily move the built hamcore.se2 into the cross compilation folder
+	mkdir -p $(PKG_BUILD_DIR)/$(HAMCORE_REL_PATH)
+	$(CP) $(HOST_BUILD_DIR)/$(HAMCORE_REL_FILE) $(PKG_BUILD_DIR)/$(HAMCORE_REL_PATH)
+	touch -d "`date -d 1day`" $(PKG_BUILD_DIR)/$(HAMCORE_REL_FILE)
+endef
+
 define Build/Configure
+	$(CP) $(PKG_BUILD_DIR)/src/makefiles/linux_64bit.mak $(PKG_BUILD_DIR)/Makefile
 endef
 
 define Build/Compile
-	make \
-		-C $(PKG_BUILD_DIR) \
-		-f src/makefiles/linux_32bit.mak \
-		clean
-
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/authors.txt
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/backup_dir_readme.txt
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/DriverPackages/
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/empty.config
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/empty_sevpnclient.config
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/eula.txt
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/install_src.dat
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/lang.config
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/languages.txt
-#	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/legal.txt
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/openvpn_readme.pdf
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/openvpn_readme.txt
-#	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/openvpn_sample.ovpn
-#	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/root_certs.dat
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/SOURCES_OF_BINARY_FILES.TXT
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/strtable_cn.stb
-#	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/strtable_en.stb
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/strtable_ja.stb
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/vpn16.exe
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/vpninstall_cn.inf
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/vpninstall_en.inf
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/vpninstall_ja.inf
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/vpnweb_sample_cn.htm
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/vpnweb_sample_en.htm
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/vpnweb_sample_ja.htm
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/warning_cn.txt
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/warning_en.txt
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/warning_ja.txt
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/webui/
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/winpcap_installer.exe
-	rm -fr $(PKG_BUILD_DIR)/src/bin/hamcore/winpcap_installer_win9x.exe
-	make \
-		-C $(PKG_BUILD_DIR) \
-		-f src/makefiles/linux_32bit.mak \
-		src/bin/BuiltHamcoreFiles/unix/hamcore.se2
-	mv $(PKG_BUILD_DIR)/src/bin/BuiltHamcoreFiles/unix/hamcore.se2 $(PKG_BUILD_DIR)/src/bin/BuiltHamcoreFiles/unix/hamcore.se2.1
-
-	make \
-		-C $(PKG_BUILD_DIR) \
-		-f src/makefiles/linux_32bit.mak \
-		clean
-	mv $(PKG_BUILD_DIR)/src/bin/BuiltHamcoreFiles/unix/hamcore.se2.1 $(PKG_BUILD_DIR)/src/bin/BuiltHamcoreFiles/unix/hamcore.se2
-	#touch -d "`date -d 1day`" $(PKG_BUILD_DIR)/tmp/hamcorebuilder
-	touch -d "`date -d 1day`" $(PKG_BUILD_DIR)/src/bin/BuiltHamcoreFiles/unix/hamcore.se2
-
-	$(MAKE) \
-		$(TARGET_CONFIGURE_OPTS) \
-		CCFLAGS="-I$(STAGING_DIR)/usr/include $(ICONV_CFLAGS) $(SE4WRT_OPTIONS)" \
-		LDFLAGS="-L$(STAGING_DIR)/usr/lib $(ICONV_LDFLAGS) -liconv" \
-		-C $(PKG_BUILD_DIR) \
-		-f src/makefiles/linux_32bit.mak
+	# Iconv stuuf
+	$(warning $(ICONV_PREFIX))
+	$(warning $(ICONV_LDFLAGS))
+	$(call Build/Compile/Default,LDFLAGS="$(ICONV_LDFLAGS) -liconv")
 endef
 
 #define Package/softethervpnserver/install
@@ -148,6 +114,31 @@ endef
 #	$(INSTALL_BIN) $(PKG_BUILD_DIR)/bin/vpncmd/* $(1)/usr/bin
 #endef
 
+define Host/Configure
+	$(CP) $(HOST_BUILD_DIR)/src/makefiles/linux_32bit.mak $(HOST_BUILD_DIR)/Makefile
+endef
+
+define Host/Prepare
+	$(call Host/Prepare/Default)
+
+	# Delete some files to save space
+	cd $(HOST_BUILD_DIR)/src/bin/hamcore/
+	mkdir -p $(HOST_BUILD_DIR)/src/bin/hamcore_minimal
+	mv $(HOST_BUILD_DIR)/src/bin/hamcore/{legal.txt,openvpn_sample.ovpn,root_certs.dat,strtable_en.stb} $(HOST_BUILD_DIR)/src/bin/hamcore_minimal
+	rm -rf $(HOST_BUILD_DIR)/src/bin/hamcore
+	mv $(HOST_BUILD_DIR)/src/bin/hamcore_minimal $(HOST_BUILD_DIR)/src/bin/hamcore
+endef
+
+define Host/Compile
+	# Build hamcore.se2 on the host, using the host hamcorebuilder
+	$(call Host/Compile/Default,$(HAMCORE_REL_FILE))
+endef
+
+define Host/Install
+endef
+
+
+$(eval $(call HostBuild))
 $(eval $(call BuildPackage,softethervpn))
 #$(eval $(call BuildPackage,softethervpnserver))
 #$(eval $(call BuildPackage,softethervpnclient))
