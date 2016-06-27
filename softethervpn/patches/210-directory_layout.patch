@@ -1,0 +1,275 @@
+--- a/src/Cedar/Cedar.h
++++ b/src/Cedar/Cedar.h
+@@ -510,22 +510,22 @@
+ #define	LOG_ENGINE_BUFFER_CACHE_SIZE_MAX	(10 * 1024 * 1024)	// Write cache size
+ 
+ // Constant such as a file name
+-#define	SERVER_LOG_DIR_NAME			"@server_log"
++#define	SERVER_LOG_DIR_NAME			"/var/softether/server_log"
+ #define	BRIDGE_LOG_DIR_NAME			SERVER_LOG_DIR_NAME
+ #define	SERVER_LOG_PERFIX			"vpn"
+ 
+-#define	HUB_SECURITY_LOG_DIR_NAME	"@security_log"
+-#define	HUB_SECURITY_LOG_FILE_NAME	"@security_log/%s"
++#define	HUB_SECURITY_LOG_DIR_NAME	"/var/softether/security_log"
++#define	HUB_SECURITY_LOG_FILE_NAME	"/var/softether/security_log/%s"
+ #define	HUB_SECURITY_LOG_PREFIX		"sec"
+-#define	HUB_PACKET_LOG_DIR_NAME		"@packet_log"
+-#define	HUB_PACKET_LOG_FILE_NAME	"@packet_log/%s"
++#define	HUB_PACKET_LOG_DIR_NAME		"/var/softether/packet_log"
++#define	HUB_PACKET_LOG_FILE_NAME	"/var/softether/packet_log/%s"
+ #define	HUB_PACKET_LOG_PREFIX		"pkt"
+ 
+-#define	NAT_LOG_DIR_NAME			"@secure_nat_log"
+-#define	NAT_LOG_FILE_NAME			"@secure_nat_log/%s"
++#define	NAT_LOG_DIR_NAME			"/var/softether/secure_nat_log"
++#define	NAT_LOG_FILE_NAME			"/var/softether/secure_nat_log/%s"
+ #define	NAT_LOG_PREFIX				"snat"
+ 
+-#define	CLIENT_LOG_DIR_NAME			"@client_log"
++#define	CLIENT_LOG_DIR_NAME			"/var/softether/client_log"
+ #define	CLIENT_LOG_PREFIX			"client"
+ 
+ // Packet log settings
+@@ -560,8 +560,8 @@
+ #define	DISK_FREE_CHECK_INTERVAL_DEFAULT	(5 * 60 * 1000)
+ 
+ // Simple log
+-#define TINY_LOG_DIRNAME			"@tiny_log"
+-#define TINY_LOG_FILENAME			"@tiny_log/%04u%02u%02u_%02u%02u%02u.log"
++#define TINY_LOG_DIRNAME			"/var/softether/tiny_log"
++#define TINY_LOG_FILENAME			"/var/softether/tiny_log/%04u%02u%02u_%02u%02u%02u.log"
+ 
+ 
+ //////////////////////////////////////////////////////////////////////
+@@ -574,7 +574,7 @@
+ //#define CE_SNAPSHOT_INTERVAL		((UINT64)(3000))
+ #define CE_SNAPSHOT_POLLING_INTERVAL	(1 * 1000)
+ #define CE_SNAPSHOT_POLLING_INTERVAL_LICENSE	(30 * 1000)
+-#define CE_SNAPSHOT_DIR_NAME		"@carrier_log"
++#define CE_SNAPSHOT_DIR_NAME		"/var/softether/carrier_log"
+ #define CE_SNAPSHOT_PREFIX			"carrier"
+ 
+ 
+@@ -591,7 +591,7 @@
+ // Expiration date of random size cache
+ #define	RAND_SIZE_CACHE_EXPIRE		(24 * 60 * 60 * 1000)
+ // Management allowed IP address list file name
+-#define	ADMINIP_TXT					"@adminip.txt"
++#define	ADMINIP_TXT					"/etc/softether/adminip.txt"
+ 
+ #define NON_SSL_MIN_COUNT			60
+ #define NON_SSL_ENTRY_EXPIRES		(10 * 60 * 1000)
+@@ -642,9 +642,9 @@
+ //////////////////////////////////////////////////////////////////////
+ 
+ #define	EL_ADMIN_PORT			22888
+-#define	EL_CONFIG_FILENAME		"@etherlogger.config"
+-#define	EL_PACKET_LOG_DIR_NAME	"@etherlogger_log"
+-#define	EL_PACKET_LOG_FILE_NAME	"@etherlogger_log/%s"
++#define	EL_CONFIG_FILENAME		"/etc/softether/etherlogger.config"
++#define	EL_PACKET_LOG_DIR_NAME	"/var/softether/etherlogger_log"
++#define	EL_PACKET_LOG_FILE_NAME	"/var/softether/etherlogger_log/%s"
+ #define	EL_PACKET_LOG_PREFIX	"pkt"
+ #define	EL_LICENSE_CHECK_SPAN	(10 * 1000)
+ 
+--- a/src/Cedar/Client.h
++++ b/src/Cedar/Client.h
+@@ -125,7 +125,7 @@
+ 
+ 
+ // Constants
+-#define	CLIENT_CONFIG_FILE_NAME				"@vpn_client.config"
++#define	CLIENT_CONFIG_FILE_NAME				"/etc/softether/vpn_client.config"
+ #define	CLIENT_DEFAULT_KEEPALIVE_HOST		"keepalive.softether.org"
+ #define	CLIENT_DEFAULT_KEEPALIVE_PORT		80
+ #define	CLIENT_DEFAULT_KEEPALIVE_INTERVAL	KEEP_INTERVAL_DEFAULT
+@@ -145,7 +145,7 @@
+ #define	CLIENT_WIN32_EXE_FILENAME_X64		"vpnclient_x64.exe"
+ #define	CLIENT_WIN32_EXE_FILENAME_IA64		"vpnclient_ia64.exe"
+ 
+-#define CLIENT_CUSTOM_INI_FILENAME			"@custom.ini"
++#define CLIENT_CUSTOM_INI_FILENAME			"/etc/softether/custom.ini"
+ 
+ #define	CLIENT_GLOBAL_PULSE_NAME			"clientglobalpulse"
+ 
+--- a/src/Cedar/Nat.h
++++ b/src/Cedar/Nat.h
+@@ -115,7 +115,7 @@
+ #define	NAT_H
+ 
+ // Constants
+-#define	NAT_CONFIG_FILE_NAME			"@vpn_router.config"	// NAT configuration file
++#define	NAT_CONFIG_FILE_NAME			"/etc/softether/vpn_router.config"	// NAT configuration file
+ #define	DEFAULT_NAT_ADMIN_PORT			2828		// Default port number for management
+ #define	NAT_ADMIN_PORT_LISTEN_INTERVAL	1000		// Interval for trying to open a port for management
+ #define	NAT_FILE_SAVE_INTERVAL			(30 * 1000)	// Interval to save
+--- a/src/Cedar/Server.c
++++ b/src/Cedar/Server.c
+@@ -115,12 +115,12 @@
+ 
+ static SERVER *server = NULL;
+ static LOCK *server_lock = NULL;
+-char *SERVER_CONFIG_FILE_NAME = "@vpn_server.config";
+-char *SERVER_CONFIG_FILE_NAME_IN_CLIENT = "@vpn_gate_svc.config";
+-char *SERVER_CONFIG_FILE_NAME_IN_CLIENT_RELAY = "@vpn_gate_relay.config";
+-char *BRIDGE_CONFIG_FILE_NAME = "@vpn_bridge.config";
+-char *SERVER_CONFIG_TEMPLATE_NAME = "@vpn_server_template.config";
+-char *BRIDGE_CONFIG_TEMPLATE_NAME = "@vpn_server_template.config";
++char *SERVER_CONFIG_FILE_NAME = "/etc/softether/vpn_server.config";
++char *SERVER_CONFIG_FILE_NAME_IN_CLIENT = "/etc/softether/vpn_gate_svc.config";
++char *SERVER_CONFIG_FILE_NAME_IN_CLIENT_RELAY = "/etc/softether/vpn_gate_relay.config";
++char *BRIDGE_CONFIG_FILE_NAME = "/etc/softether/vpn_bridge.config";
++char *SERVER_CONFIG_TEMPLATE_NAME = "/etc/softether/vpn_server_template.config";
++char *BRIDGE_CONFIG_TEMPLATE_NAME = "/etc/softether/vpn_server_template.config";
+ 
+ static bool server_reset_setting = false;
+ 
+@@ -1108,8 +1108,6 @@ LIST *EnumLogFile(char *hubname)
+ 		hubname = NULL;
+ 	}
+ 
+-	GetExeDir(exe_dir, sizeof(exe_dir));
+-
+ 	// Enumerate in the server_log
+ 	if (hubname == NULL)
+ 	{
+@@ -1117,8 +1115,7 @@ LIST *EnumLogFile(char *hubname)
+ 	}
+ 
+ 	// Enumerate in the packet_log
+-	Format(tmp, sizeof(tmp), "%s/packet_log", exe_dir);
+-	dir = EnumDir(tmp);
++	dir = EnumDir("/var/softether/packet_log");
+ 	if (dir != NULL)
+ 	{
+ 		UINT i;
+@@ -1142,8 +1139,7 @@ LIST *EnumLogFile(char *hubname)
+ 	}
+ 
+ 	// Enumerate in the security_log
+-	Format(tmp, sizeof(tmp), "%s/security_log", exe_dir);
+-	dir = EnumDir(tmp);
++	dir = EnumDir("/var/softether/security_log");
+ 	if (dir != NULL)
+ 	{
+ 		UINT i;
+@@ -1182,8 +1178,8 @@ void EnumLogFileDir(LIST *o, char *dirna
+ 		return;
+ 	}
+ 
+-	GetExeDir(exe_dir, sizeof(exe_dir));
+-	Format(dir_full_path, sizeof(dir_full_path), "%s/%s", exe_dir, dirname);
++	// GetExeDir(exe_dir, sizeof(exe_dir));
++	Format(dir_full_path, sizeof(dir_full_path), "/var/softether/%s", dirname);
+ 
+ 	dir = EnumDir(dir_full_path);
+ 	if (dir == NULL)
+@@ -1201,7 +1197,7 @@ void EnumLogFileDir(LIST *o, char *dirna
+ 			char file_path[MAX_PATH];
+ 
+ 			Format(file_path, sizeof(file_path), "%s/%s", dirname, e->FileName);
+-			Format(full_path, sizeof(full_path), "%s/%s", exe_dir, file_path);
++			Format(full_path, sizeof(full_path), "/var/softether/%s", file_path);
+ 
+ 			if (EndWith(file_path, ".log"))
+ 			{
+@@ -10917,7 +10913,7 @@ SERVER *SiNewServerEx(bool bridge, bool
+ #endif	// OS_WIN32
+ 
+ #ifdef	ENABLE_AZURE_SERVER
+-	if (IsFileExists("@azureserver.config"))
++	if (IsFileExists("/etc/softether/azureserver.config"))
+ 	{
+ 		DisableRDUPServerGlobally();
+ 		s->AzureServer = NewAzureServer(s->Cedar);
+--- a/src/Mayaqua/Cfg.c
++++ b/src/Mayaqua/Cfg.c
+@@ -139,7 +139,7 @@ void BackupCfgWEx(CFG_RW *rw, FOLDER *f,
+ 	}
+ 
+ 	// Determine the directory name
+-	UniFormat(dirname, sizeof(dirname), L"@backup.%s", original[0] == L'@' ? original + 1 : original);
++	UniFormat(dirname, sizeof(dirname), L"/var/softether/backup.%s", original[0] == L'@' ? original + 1 : original);
+ 
+ 	// Determine the file name
+ 	LocalTime(&st);
+--- a/src/Mayaqua/Cfg.h
++++ b/src/Mayaqua/Cfg.h
+@@ -117,7 +117,7 @@
+ // Macro
+ //#define	CHECK_CFG_NAME_EXISTS			// Check duplication of the existing name
+ 
+-#define	SAVE_BINARY_FILE_NAME_SWITCH	L"@save_binary"
++#define	SAVE_BINARY_FILE_NAME_SWITCH	L"/var/softether/save_binary"
+ 
+ // Constants
+ #define	TAG_DECLARE			"declare"
+--- a/src/Mayaqua/Kernel.c
++++ b/src/Mayaqua/Kernel.c
+@@ -2213,7 +2213,7 @@ void AbortExitEx(char *msg)
+ 		msg = "Unknown Error";
+ 	}
+ 
+-	f = fopen("abort_error_log.txt", "w");
++	f = fopen("/var/softether/abort_error_log.txt", "w");
+ 	if (f != NULL)
+ 	{
+ 		fwrite(msg, 1, strlen(msg), f);
+--- a/src/Mayaqua/Table.h
++++ b/src/Mayaqua/Table.h
+@@ -117,7 +117,7 @@
+ //#define	UNICODE_CACHE_FILE		L".unicode_cache_%s.dat"
+ //
+ //#define	LANGLIST_FILENAME		"|languages.txt"
+-//#define	LANG_CONFIG_FILENAME	L"@lang.config"
++//#define	LANG_CONFIG_FILENAME	L"/etc/softether/lang.config"
+ //#define	LANG_CONFIG_TEMPLETE	"|lang.config"
+ //
+ //// Language constant
+--- a/src/Mayaqua/Unix.c
++++ b/src/Mayaqua/Unix.c
+@@ -931,7 +931,7 @@ void *UnixNewSingleInstance(char *instan
+ 	GetExeDir(dir, sizeof(dir));
+ 
+ 	// File name generation
+-	Format(name, sizeof(name), "%s/.%s", dir, tmp);
++	Format(name, sizeof(name), "/var/softether/.%s", tmp);
+ 
+ 	fd = open(name, O_WRONLY);
+ 	if (fd == -1)
+@@ -2320,7 +2320,7 @@ void UnixGenPidFileName(char *name, UINT
+ 	Hash(hash, exe_name, StrLen(exe_name), false);
+ 	BinToStr(tmp1, sizeof(tmp1), hash, sizeof(hash));
+ 
+-	Format(name, size, "%s/.pid_%s", dir, tmp1);
++	Format(name, size, "/var/softether/.pid_%s", tmp1);
+ }
+ 
+ // Delete the PID file
+@@ -2365,7 +2365,7 @@ void UnixGenCtlFileName(char *name, UINT
+ 	Hash(hash, exe_name, StrLen(exe_name), false);
+ 	BinToStr(tmp1, sizeof(tmp1), hash, sizeof(hash));
+ 
+-	Format(name, size, "%s/.ctl_%s", dir, tmp1);
++	Format(name, size, "/var/softether/.ctl_%s", tmp1);
+ }
+ 
+ // Write the CTL file
+--- a/src/Cedar/Logging.c
++++ b/src/Cedar/Logging.c
+@@ -538,11 +538,12 @@ ERASER *NewEraser(LOG *log, UINT64 min_s
+ 
+ 	e = ZeroMalloc(sizeof(ERASER));
+ 
+-	GetExeDir(dir, sizeof(dir));
++	// Use /var/softether for free space check, not the exe folder
++	// GetExeDir(dir, sizeof(dir));
+ 
+ 	e->Log = log;
+ 	e->MinFreeSpace = min_size;
+-	e->DirName = CopyStr(dir);
++	e->DirName = CopyStr("/var/softether/");
+ 	e->HaltEvent = NewEvent();
+ 
+ 	e->Thread = NewThread(EraserThread, e);

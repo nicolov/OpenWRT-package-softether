@@ -37,9 +37,9 @@ define Package/softethervpn
 endef
 
 define Package/softethervpn/conffiles
-	/usr/bin/vpn_bridge.config
-	/usr/bin/vpn_client.config
-	/usr/bin/vpn_server.config
+	/etc/softether/vpn_bridge.config
+	/etc/softether/vpn_client.config
+	/etc/softether/vpn_server.config
 endef
 
 #define Package/softethervpnclient
