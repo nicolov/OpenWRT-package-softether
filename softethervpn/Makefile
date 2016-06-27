@@ -74,7 +74,7 @@ define Build/Prepare
 endef
 
 define Build/Configure
-	$(CP) $(PKG_BUILD_DIR)/src/makefiles/linux_64bit.mak $(PKG_BUILD_DIR)/Makefile
+	$(CP) $(PKG_BUILD_DIR)/src/makefiles/linux_32bit.mak $(PKG_BUILD_DIR)/Makefile
 endef
 
 define Build/Compile
